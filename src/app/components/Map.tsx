@@ -7,7 +7,7 @@ const DynamicMap = dynamic(() => import('./DynamicMap'), {
 
 const Map = (props: any) => {
   return (
-    <div style={{height: "80vh", width: "100%"}}>
+    <div style={{height: "60vh", width: "60%"}}>
       <DynamicMap {...props} />
     </div>
   )
