@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import indiaBoundaryLines from '../../../../public/dispute.json'
+import example from '../../../../public/example.json'
 import styles from './map.module.css'
 
 const BoundaryLayer = ({ data }) => {
@@ -41,7 +42,6 @@ const MapComponent = () => {
     [90, 180]    // Northeast corner
   ];
   return (
-
     <MapContainer className={styles.map} center={[34, 80]} zoom={4} minZoom={3} maxBounds={bounds} maxBoundsViscosity={1.0}>
       <TileLayer
         noWrap={true}
@@ -50,6 +50,7 @@ const MapComponent = () => {
         attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
       />
       <BoundaryLayer data={indiaBoundaryLines} />
+      <GeoJSON data={example}/>
     </MapContainer>
   );
 };
