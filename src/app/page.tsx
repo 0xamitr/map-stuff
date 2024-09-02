@@ -1,16 +1,14 @@
-"use client"
 import dynamic from 'next/dynamic';
-import 'leaflet/dist/leaflet.css';
+import dbConnect from './lib/dbConnect'
 
-const Map = dynamic(() => import('./components/map/map'), {
-  ssr: false
+const MapContainer = dynamic(() => import('./mapcontainer'), {
+  ssr: false // Ensure MapContainer is client-side
 });
-
-export default function Home() {
+export default async function Home() {
+  await dbConnect(); 
   return (
         <>
-          <h1> BEGINNING</h1>
-          <Map />
+          <MapContainer />
         </>
   )
 }

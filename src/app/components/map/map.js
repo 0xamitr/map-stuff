@@ -5,10 +5,11 @@ import 'leaflet/dist/leaflet.css';
 import indiaBoundaryLines from '../../../../public/dispute.json'
 import example from '../../../../public/example.json'
 import styles from './map.module.css'
+import dbConnect from '../../lib/dbConnect'
 
 const BoundaryLayer = ({ data }) => {
   const map = useMap();
-
+  dbConnect()
   useEffect(() => {
     const boundaryStyle = (feature) => {
       const weight = map.getZoom() / 4;
