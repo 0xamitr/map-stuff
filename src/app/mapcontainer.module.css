@@ -1,0 +1,253 @@
+.shell {
+  min-height: 100vh;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(99, 173, 229, 0.18), transparent 33%),
+    radial-gradient(circle at 82% 6%, rgba(255, 181, 120, 0.2), transparent 32%),
+    linear-gradient(180deg, #f7f8f8 0%, #eceff1 100%);
+  display: block;
+}
+
+.controlPanel {
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+  padding: 18px;
+  width: 360px;
+  box-sizing: border-box;
+}
+
+.panelHeader {
+  margin-bottom: 14px;
+}
+
+.kicker {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: #6f7885;
+}
+
+.title {
+  margin: 4px 0;
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.subtitle {
+  margin: 0;
+  color: #4b5563;
+}
+
+.section {
+  margin-top: 12px;
+}
+
+.sectionTitle {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  border: 1px solid rgba(30, 41, 59, 0.14);
+  background: #ffffff;
+  color: #334155;
+  border-radius: 4px;
+  padding: 9px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pillActive {
+  background: #1f2937;
+  color: #f8fafc;
+  border-color: #1f2937;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 900px) {
+  .segmented {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.segment {
+  border: 1px solid rgba(30, 41, 59, 0.14);
+  border-radius: 4px;
+  background: #ffffff;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+}
+
+.segmentActive {
+  background: #0b5394;
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.statsRow {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statChip {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(15, 23, 42, 0.07);
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.mapWrap {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.09);
+  flex: 1 1 auto;
+  min-height: 60vh;
+}
+
+.projectListPanel {
+  position: relative;
+  width: 100%;
+  max-height: calc(60vh);
+  overflow: auto;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: none;
+  margin-top: 16px;
+}
+
+.projectListTitle {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.projectList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.projectItem {
+  font-size: 0.9rem;
+}
+
+.projectItem label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.projectLabel {
+  flex: 1 1 auto;
+  color: #1f2937;
+}
+
+.projectMeta {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.projectListNote {
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.categoryNav {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.categoryNav a {
+  color: #334155;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.pillActive {
+  background: #1f2937;
+  color: #f8fafc;
+  border-color: #1f2937;
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loadingCard {
+  font-size: 0.9rem;
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.74);
+  border-radius: 10px;
+  padding: 9px 13px;
+}
+
+.emptyOverlay {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.82);
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  z-index: 600;
+}
+
+@media (min-width: 1000px) {
+  .shell {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .controlPanel {
+    margin: 0;
+    height: calc(100vh - 36px);
+    overflow: auto;
+  }
+
+  .mapWrap {
+    width: calc(100% - 380px);
+    min-height: calc(80vh);
+  }
+}

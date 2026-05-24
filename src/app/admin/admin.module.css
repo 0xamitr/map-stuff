@@ -1,0 +1,277 @@
+.shell {
+  min-height: 100vh;
+  padding: 32px;
+  background:
+    radial-gradient(circle at top left, rgba(160, 174, 192, 0.22), transparent 35%),
+    radial-gradient(circle at top right, rgba(215, 201, 168, 0.16), transparent 30%),
+    linear-gradient(180deg, #f7f5f1 0%, #efebe4 100%);
+  color: #1f2933;
+}
+
+.loginCard,
+.headerCard,
+.panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(31, 41, 51, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(31, 41, 51, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.loginCard {
+  max-width: 520px;
+  margin: 10vh auto 0;
+  padding: 32px;
+}
+
+.headerCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1100px) {
+  .grid {
+    grid-template-columns: 380px 1fr;
+    align-items: start;
+  }
+}
+
+.widePanel {
+  grid-column: 1 / -1;
+}
+
+.panel {
+  padding: 24px;
+}
+
+.kicker {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: #7b6a55;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  max-width: 60ch;
+  color: #5f6670;
+}
+
+.form {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.input,
+.select {
+  width: 100%;
+  border: 1px solid rgba(31, 41, 51, 0.14);
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px 14px;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+.multiselect {
+  min-height: 180px;
+}
+
+.input:focus,
+.select:focus {
+  border-color: #7a8474;
+  box-shadow: 0 0 0 4px rgba(122, 132, 116, 0.12);
+}
+
+.primaryButton,
+.secondaryButton,
+.smallButton {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background: #1f2933;
+  color: white;
+}
+
+.secondaryButton {
+  background: #efe8dc;
+  color: #1f2933;
+}
+
+.smallButton {
+  background: #dbe4dc;
+  color: #1f2933;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(31, 41, 51, 0.06);
+  color: #4b5563;
+  font-size: 0.8rem;
+}
+
+.note {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(122, 132, 116, 0.12);
+  color: #334155;
+}
+
+.error {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(185, 28, 28, 0.1);
+  color: #991b1b;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.table th,
+.table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(31, 41, 51, 0.08);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #64748b;
+}
+
+.emptyState {
+  text-align: center;
+  color: #6b7280;
+  padding: 36px 12px !important;
+}
+
+.groupForm {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.groupFormGrid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 800px) {
+  .groupFormGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.groupActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.groupList {
+  display: grid;
+  gap: 16px;
+}
+
+.groupCard {
+  border: 1px solid rgba(31, 41, 51, 0.08);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(247, 245, 241, 0.7);
+}
+
+.groupCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.groupDescription {
+  margin: 6px 0 0;
+  color: #5f6670;
+}
+
+.groupProjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.projectChip {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(31, 41, 51, 0.08);
+  color: #334155;
+  font-size: 0.85rem;
+}
+
+.emptyText {
+  color: #6b7280;
+  font-size: 0.9rem;
+}

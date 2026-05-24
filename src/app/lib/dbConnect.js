@@ -13,13 +13,31 @@ async function dbConnect() {
         return;
     }
 
-    if (cached.conn) {
+    if (!MONGODB_URI) {
+        throw new Error('Missing MONGODB_URI')
+    }
+
+    const readyState = mongoose.connection.readyState
+
+    // 1 = connected
+    if (cached.conn && readyState === 1) {
         return cached.conn
     }
+
+    // If we ended up with a stale cached connection reference, reset and reconnect.
+    if (cached.conn && readyState === 0) {
+        cached.conn = null
+        cached.promise = null
+    }
+
     if (!cached.promise) {
         const opts = {
             bufferCommands: false,
+            serverSelectionTimeoutMS: 8000,
+            socketTimeoutMS: 20000,
+            maxPoolSize: 10,
         }
+        console.log('Connecting to db...')
         cached.promise = mongoose.connect(MONGODB_URI, opts).then(mongoose => {
             console.log('Db connected')
             return mongoose

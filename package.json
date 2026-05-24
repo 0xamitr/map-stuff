@@ -9,7 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tmcw/togeojson": "^7.1.2",
+    "@turf/combine": "^7.3.5",
+    "@turf/simplify": "^7.3.5",
     "aws4": "^1.13.1",
+    "jszip": "^3.10.1",
     "leaflet": "^1.9.4",
     "mapbox-gl": "^3.6.0",
     "mongodb": "^6.8.0",
@@ -18,7 +22,8 @@
     "react": "^18",
     "react-dom": "^18",
     "react-leaflet": "^4.2.1",
-    "sass": "^1.70.0"
+    "sass": "^1.70.0",
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.13",
