@@ -7,6 +7,10 @@ const ProjectGroupSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    slug: {
+      type: String,
+      index: true,
+    },
     description: {
       type: String,
       default: "",

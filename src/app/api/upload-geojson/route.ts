@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../lib/dbConnect";
 import Project from "../../../../models/project";
 import { ADMIN_SESSION_COOKIE, isAdminCookieValid } from "../../lib/adminAuth";
+import { slugifyProjectName } from "../../lib/slug";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,16 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { name, geojson, category, status } = body;
+    const projectName = typeof name === "string" && name.trim() ? name.trim() : "untitled-project";
+    const slugBase = slugifyProjectName(projectName) || "untitled-project";
+
+    let slug = slugBase;
+    let suffix = 2;
+
+    while (await Project.exists({ slug })) {
+      slug = `${slugBase}-${suffix}`;
+      suffix += 1;
+    }
 
     if (!geojson) {
       return NextResponse.json(
@@ -46,7 +57,8 @@ export async function POST(req: NextRequest) {
     }
 
     const project = await Project.create({
-      name,
+      name: projectName,
+      slug,
       geojson,
       category,
       status,
@@ -55,6 +67,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       id: project._id,
+      slug: project.slug,
     });
   } catch (err) {
     return NextResponse.json(

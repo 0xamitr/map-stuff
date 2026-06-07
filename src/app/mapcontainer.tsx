@@ -6,8 +6,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import styles from './mapcontainer.module.css';
+import { slugifyProjectName } from './lib/slug';
 
-const Map = dynamic(() => import('./components/map/map'), {
+const LeafletMap = dynamic(() => import('./components/map/map'), {
   ssr: false
 });
 
@@ -34,7 +35,23 @@ const normalizeProject = (project: any) => {
   };
 };
 
-export default function MapContainer() {
+const projectDatasetCache = new Map<string, any[]>();
+
+type MapContainerProps = {
+  allowedProjectIds?: string[];
+  routeBaseSlug?: string;
+};
+
+export default function MapContainer({ allowedProjectIds, routeBaseSlug }: MapContainerProps) {
+  return <MapContainerShell allowedProjectIds={allowedProjectIds} routeBaseSlug={routeBaseSlug} />;
+}
+
+type MapContainerShellProps = {
+  allowedProjectIds?: string[];
+  routeBaseSlug?: string;
+};
+
+function MapContainerShell({ allowedProjectIds, routeBaseSlug }: MapContainerShellProps) {
   const [projects, setProjects] = useState<any[]>([]);
   const [fullProjects, setFullProjects] = useState<any[]>([]); // cached all statuses for current category
   const [visibleProjectIds, setVisibleProjectIds] = useState<string[]>([]);
@@ -44,21 +61,27 @@ export default function MapContainer() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
-  const categoryKeyToSlug = (k: CategoryKey) => {
+  const categoryKeyToSlug = (k: CategoryKey | null) => {
     if (k === 'high speed rail') return 'high-speed-rail';
     return k;
   };
 
-  const getRouteState = (): { category: CategoryKey; scope: 'current' | 'currentAndUc' | 'currentUcProposed' } => {
-    let category: CategoryKey = 'high speed rail';
+  const getRouteState = (): { category: CategoryKey | null; scope: 'current' | 'currentAndUc' | 'currentUcProposed' } => {
+    let category: CategoryKey | null = 'high speed rail';
     let scope: 'current' | 'currentAndUc' | 'currentUcProposed' = 'currentUcProposed';
 
     if (pathname) {
       const parts = pathname.split('/').filter(Boolean);
-      const [catSlug, statusSlug] = parts;
-      const categoryFromPath = catSlug ? slugToCategoryKey(catSlug) : null;
-      if (categoryFromPath) category = categoryFromPath;
-      if (statusSlug) scope = statusSlugToScope(statusSlug);
+      const [firstPart, secondPart, thirdPart] = parts;
+
+      if (firstPart === 'projects' && secondPart) {
+        category = null;
+        scope = thirdPart ? statusSlugToScope(thirdPart) : 'currentUcProposed';
+      } else {
+        const categoryFromPath = firstPart ? slugToCategoryKey(firstPart) : null;
+        if (categoryFromPath) category = categoryFromPath;
+        if (secondPart) scope = statusSlugToScope(secondPart);
+      }
     }
 
     if (searchParams) {
@@ -70,7 +93,7 @@ export default function MapContainer() {
       else if (categoryFromQuery === 'metros') category = 'metros';
 
       if (statusFromQuery) {
-        scope = statusSlugToScope(statusFromQuery);
+          scope = statusSlugToScope(statusFromQuery);
       }
     }
 
@@ -95,13 +118,27 @@ export default function MapContainer() {
   // Fetch the full project list for the selected category (once), then filter client-side for scope changes.
   useEffect(() => {
     const fetchData = async () => {
+      const cacheKey = `${selectedCategory || 'all'}|${Array.isArray(allowedProjectIds) && allowedProjectIds.length ? allowedProjectIds.join(',') : 'all'}`;
+      const cachedProjects = projectDatasetCache.get(cacheKey);
+
+      if (cachedProjects) {
+        setLoading(false);
+        setFetchError(null);
+        setFullProjects(cachedProjects);
+        setVisibleProjectIds(cachedProjects.map((p: any) => p._id || p.id || p.name));
+        return;
+      }
+
       setLoading(true);
       setFetchError(null);
       setProjects([]);
       setFullProjects([]);
       setVisibleProjectIds([]);
       try {
-        const params = new URLSearchParams({ category: selectedCategory, scope: 'all' });
+        const params = new URLSearchParams({ scope: 'all' });
+        if (selectedCategory) {
+          params.set('category', selectedCategory);
+        }
         const res = await fetch(`/api/getallmapdata?${params.toString()}`);
         if (!res.ok) {
           const text = await res.text().catch(() => '');
@@ -113,8 +150,12 @@ export default function MapContainer() {
         }
         const jsonData = await res.json();
         const normalized = Array.isArray(jsonData) ? jsonData.map((p) => normalizeProject(p)) : [];
-        setFullProjects(normalized);
-        setVisibleProjectIds(normalized.map((p: any) => p._id || p.id || p.name));
+        const scoped = Array.isArray(allowedProjectIds) && allowedProjectIds.length
+          ? normalized.filter((project) => allowedProjectIds.includes(project._id || project.id || project.name))
+          : normalized;
+        projectDatasetCache.set(cacheKey, scoped);
+        setFullProjects(scoped);
+        setVisibleProjectIds(scoped.map((p: any) => p._id || p.id || p.name));
       } catch (err) {
         console.error('Failed to load map data', err);
         setFetchError(String(err));
@@ -126,7 +167,7 @@ export default function MapContainer() {
     };
 
     fetchData();
-  }, [selectedCategory]);
+  }, [selectedCategory, allowedProjectIds]);
 
   // When fullProjects or statusScope changes, compute the filtered projects shown.
   useEffect(() => {
@@ -156,9 +197,13 @@ export default function MapContainer() {
   useEffect(() => {
     if (!pathname) return;
     const parts = pathname.split('/').filter(Boolean);
-    const [catSlug, statusSlug] = parts;
-    let cat = catSlug ? slugToCategoryKey(catSlug) : null;
-    let scope = statusSlug ? statusSlugToScope(statusSlug) : 'currentUcProposed';
+    const [firstPart, secondPart, thirdPart] = parts;
+    let cat = firstPart ? slugToCategoryKey(firstPart) : null;
+    let scope = thirdPart
+      ? statusSlugToScope(thirdPart)
+      : secondPart
+      ? statusSlugToScope(secondPart)
+      : 'currentUcProposed';
 
     // If rewrite routed to /projects?category=...&status=..., pathname may be /projects.
     // Fall back to searchParams when pathname doesn't include expected category/status.
@@ -173,12 +218,12 @@ export default function MapContainer() {
         else if (catFromQuery === 'metros') cat = 'metros';
       }
       if (statusFromQuery) {
-        scope = statusSlug ? scope : statusSlugToScope(statusFromQuery);
+        scope = statusSlugToScope(statusFromQuery);
       }
     }
     // if path is only category (no status), redirect to /category/proposed
-    if (catSlug && !statusSlug) {
-      const target = `/${catSlug}/proposed`;
+    if (firstPart && !secondPart) {
+      const target = `/${firstPart}/proposed`;
       if (pathname !== target) router.replace(target);
     }
   }, [pathname, searchParams, router]);
@@ -231,8 +276,11 @@ export default function MapContainer() {
               { slug: 'uc', label: 'Completed + U/C', scope: 'currentAndUc' },
               { slug: 'proposed', label: 'Completed + U/C + Proposed', scope: 'currentUcProposed' },
             ].map((opt) => {
-              const catSlug = categoryKeyToSlug(selectedCategory);
-              const href = `/${catSlug}/${opt.slug}`;
+              const href = selectedCategory
+                ? `/${categoryKeyToSlug(selectedCategory)}/${opt.slug}`
+                : routeBaseSlug
+                ? `/projects/${routeBaseSlug}/${opt.slug}`
+                : `/projects/${opt.slug}`;
               const active = statusScope === (opt.scope as any);
               return (
                 <Link
@@ -250,7 +298,7 @@ export default function MapContainer() {
         <div className={styles.statsRow}>
           <span className={styles.statChip}>Visible projects: {displayedProjects.length}</span>
           <span className={styles.statChip}>
-            Selected type: {CATEGORY_OPTIONS.find((x) => x.key === selectedCategory)?.label}
+            Selected type: {selectedCategory ? CATEGORY_OPTIONS.find((x) => x.key === selectedCategory)?.label : 'All types'}
           </span>
         </div>
 
@@ -264,21 +312,27 @@ export default function MapContainer() {
             {displayedProjects.map((p) => {
               const id = p._id || p.id || p.name;
               const checked = visibleProjectIds.includes(id);
+              const projectSlug = p.slug || slugifyProjectName(p.name || id || 'project');
               return (
                 <li key={id} className={styles.projectItem}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => {
-                        setVisibleProjectIds((prev) =>
-                          prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-                        );
-                      }}
-                    />
-                    <span className={styles.projectLabel}>{p.name || 'Untitled'}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        aria-label={`Toggle visibility for ${p.name || 'untitled project'}`}
+                        onChange={() => {
+                          setVisibleProjectIds((prev) =>
+                            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+                          );
+                        }}
+                      />
+                    </label>
+                    <Link className={styles.projectLabel} href={`/projects/${projectSlug}`}>
+                      {p.name || 'Untitled'}
+                    </Link>
                     <span className={styles.projectMeta}>{p.status || ''}</span>
-                  </label>
+                  </div>
                 </li>
               );
             })}
@@ -287,7 +341,7 @@ export default function MapContainer() {
       </section>
 
       <div className={styles.mapWrap}>
-        <Map mapdata={filteredMapData} />
+        <LeafletMap mapdata={filteredMapData} />
 
         {!loading && !visibleProjects.length && (
           <div className={styles.emptyOverlay}>No projects match the selected filters.</div>

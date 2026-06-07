@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 
 const ProjectSchema = new mongoose.Schema({
   name: String,
+  slug: {
+    type: String,
+    index: true,
+  },
   geojson: {
     type: Object,
     required: true,

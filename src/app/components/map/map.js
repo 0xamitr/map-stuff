@@ -52,6 +52,36 @@ const getHoverWeight = (zoom) => clamp(getRoadWeight(zoom) + 1.8, 2.6, 10);
 
 const getBoundaryWeight = (zoom) => clamp(0.55 + (zoom - 4) * 0.22, 0.8, 2.8);
 
+const toFeatureCollection = (mapdata) => {
+  const features = [];
+
+  mapdata.forEach((project) => {
+    if (!project?.geojson) return;
+
+    const attachProject = (feature) => ({
+      ...feature,
+      properties: {
+        ...(feature?.properties || {}),
+        __project: project,
+      },
+    });
+
+    if (project.geojson.type === 'FeatureCollection' && Array.isArray(project.geojson.features)) {
+      project.geojson.features.forEach((feature) => {
+        features.push(attachProject(feature));
+      });
+      return;
+    }
+
+    features.push(attachProject(project.geojson));
+  });
+
+  return {
+    type: 'FeatureCollection',
+    features,
+  };
+};
+
 const BoundaryLayer = ({ data }) => {
   const map = useMap();
 
@@ -103,7 +133,7 @@ const RoadLayer = ({ mapdata }) => {
   useEffect(() => {
     if (!mapdata?.length) return;
 
-    const featureLayers = [];
+    const combinedGeojson = toFeatureCollection(mapdata);
 
     const getStyle = (project) => {
       const status = getStatusToken(project);
@@ -132,40 +162,37 @@ const RoadLayer = ({ mapdata }) => {
       layer.setStyle(getStyle(project));
     };
 
-    mapdata.forEach((project) => {
-      const status = getStatusToken(project);
-      const theme = STATUS_THEME[status] || STATUS_THEME.default;
-      const title = getLayerLabel(project);
+    const geoJsonLayer = L.geoJSON(combinedGeojson, {
+      renderer: L.canvas(),
+      style: (feature) => getStyle(feature?.properties?.__project),
+      onEachFeature: (feature, leafletLayer) => {
+        const project = feature?.properties?.__project;
+        if (!project) return;
 
-      if (!project?.geojson) return;
+        const status = getStatusToken(project);
+        const theme = STATUS_THEME[status] || STATUS_THEME.default;
+        const title = getLayerLabel(project);
 
-      const layer = L.geoJSON(project.geojson, {
-        renderer: L.canvas(),
-        style: () => getStyle(project),
-        onEachFeature: (_feature, leafletLayer) => {
-          leafletLayer.bindTooltip(
-            `<div class="${styles.tooltipTitle}">${title}</div><div class="${styles.tooltipMeta}">${theme.label}</div>`,
-            {
-              sticky: true,
-              direction: 'auto',
-              opacity: 0.96,
-              className: styles.tooltip,
-            }
-          );
+        leafletLayer.bindTooltip(
+          `<div class="${styles.tooltipTitle}">${title}</div><div class="${styles.tooltipMeta}">${theme.label}</div>`,
+          {
+            sticky: true,
+            direction: 'auto',
+            opacity: 0.96,
+            className: styles.tooltip,
+          }
+        );
 
-          leafletLayer.on({
-            mouseover: () => highlightLayer(leafletLayer),
-            mouseout: () => resetLayer(leafletLayer, project),
-          });
-        },
-      }).addTo(map);
-
-      featureLayers.push({ layer, project });
-    });
+        leafletLayer.on({
+          mouseover: () => highlightLayer(leafletLayer),
+          mouseout: () => resetLayer(leafletLayer, project),
+        });
+      },
+    }).addTo(map);
 
     const refreshWeights = () => {
-      featureLayers.forEach(({ layer, project }) => {
-        layer.setStyle(getStyle(project));
+      geoJsonLayer.eachLayer((layer) => {
+        layer.setStyle(getStyle(layer.feature?.properties?.__project));
       });
     };
 
@@ -173,7 +200,7 @@ const RoadLayer = ({ mapdata }) => {
 
     return () => {
       map.off('zoomend', refreshWeights);
-      featureLayers.forEach(({ layer }) => map.removeLayer(layer));
+      map.removeLayer(geoJsonLayer);
     };
   }, [map, mapdata]);
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../lib/dbConnect";
+import "../../../../../models/project";
 import ProjectGroup from "../../../../../models/projectGroup";
 import { ADMIN_SESSION_COOKIE, isAdminCookieValid } from "../../../lib/adminAuth";
 
